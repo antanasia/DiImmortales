@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .book .box{
+        margin:2rem;
+        position: relative;
+        overflow: hidden;
+        border:var(--border);
+        text-align: center;
+        width:30%;
+        display:inline-block;
+    }
+
+    .book .box:hover{
+        border:var(--border-hover);
+    }
+
+    .book .box .image{
+        padding:1rem;
+        background: linear-gradient(15deg, #eee 30%, #fff 30.1%);
+    }
+
+    .book  .box:hover .image{
+        transform: translateY(6rem);
+    }
+
+    .book .box .image img{
+        height: 25rem;
+    }
+
+    .book  .box .icons{
+        border-bottom: var(--border-hover);
+        position: absolute;
+        top:0; left:0; right: 0;
+        background: #fff;
+        z-index: 1;
+        transform: translateY(-105%);
+    }
+
+    .book .box:hover .icons{
+        transform: translateY(0%);
+    }
+
+    .book .box .icons button{
+        color:var(--black);
+        font-size: 2.2rem;
+        padding:1.3rem 1.5rem;
+    }
+
+
+    .book .box .icons span{
+        color:var(--black);
+        font-size: 2.2rem;
+        padding:1.3rem 1.5rem;
+    }
+
+
+    .book  .box .content{
+        background:#eee;
+        padding:1.5rem;
+    }
+
+    .book  .box .content h3{
+        font-size: 2rem;
+        color:var(--black);
+    }
+
+    .book .box .content .price{
+        font-size: 2.2rem;
+        color:var(--black);
+        padding-top: 1rem;
+    }
+
+.total-price {
+    font-size: 1.7rem;
+    text-align: right !important;
+    margin: 2rem;
+    border: 2px solid var(--black) !important;
+    padding: 0.5rem 1rem;
+    display: inline-block;
+}
+
+.align-right {
+    float: right;
+    margin: 2rem;
+}
+
+  .empty-cart-message {
+    text-align: center;
+    margin:320px;
+}
+
+.empty-cart-message p {
+    font-size: 50px;
+    font-weight: bold;
+    color: #666;
+}
+
+.empty-cart-message a {
+    margin-top:50px;
+</style>
+
+{% if cart.cart_items.all %}
+    <div class="book">
+        {% for item in cart.cart_items.all %}
+            <div class="box">
+                <div class="icons">
+                    <button class="change-quantity" data-item-id="{{ item.id }}" data-action="decrease">-</button>
+                    <span class="quantity">{{ item.quantity }}</span>
+                    <button class="change-quantity" data-item-id="{{ item.id }}" data-action="increase">+</button>
+                </div>
+                <div class="image">
+                    <img src="{{ item.book.bookImage }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>{{ item.book.bookName }}</h3>
+                    <div class="price">{{ item.total_price }} ₸</div>
+                    <button class="btn remove-item" data-item-id="{{ item.id }}">Удалить</button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="total-price">
+        Общая цена: <span id="total-cart-price">{{ cart.total_price }} $</span>
+    </div>
+
+    <button class="btn buy align-right">Купить</button>
+{% else %}
+    <div class="empty-cart-message">
+        <p>Корзина пуста</p>
+        <a href="{% url 'catalogPage' %}" class="btn">Перейти в каталог</a>
+    </div>
+{% endif %}
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+    var stripePublicKey = "{{ stripe_public_key }}";
+    var stripe = Stripe(stripePublicKey);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        function updateCart() {
+            fetch('/cart/total_price/')
+                .then(response => response.json())
+                .then(data => {
+                    const totalPriceElement = document.getElementById('total-cart-price');
+                    totalPriceElement.textContent = `${data.total_price} $`;
+                    if (data.total_price <= 0) {
+                        location.reload();
+                    }
+                });
+        }
+
+        document.querySelectorAll('.change-quantity').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const itemId = this.getAttribute('data-item-id');
+                const action = this.getAttribute('data-action');
+
+                fetch(`/update_quantity/${itemId}/${action}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const boxElement = this.closest('.box');
+                        const quantityElement = boxElement.querySelector('.quantity');
+                        const totalElement = boxElement.querySelector('.price');
+
+                        if (data.quantity <= 0) {
+                            boxElement.parentNode.removeChild(boxElement);
+                        } else {
+                            quantityElement.textContent = data.quantity;
+                            totalElement.textContent = `${data.total_price} $`;
+                        }
+
+                        updateCart();
+                    });
+            });
+        });
+
+        document.querySelectorAll('.remove-item').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const itemId = this.getAttribute('data-item-id');
+
+                fetch(`/remove_item/${itemId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const boxElement = this.closest('.box');
+                        boxElement.parentNode.removeChild(boxElement);
+
+                        updateCart();
+                    });
+            });
+        });
+
+        // Обработчик для кнопки "Купить"
+        document.querySelector('.buy').addEventListener('click', function () {
+            fetch('{% url "create_payment_intent" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                } else {
+                    stripe.redirectToCheckout({ sessionId: data.sessionId });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+</script>
+
+{% endblock %}

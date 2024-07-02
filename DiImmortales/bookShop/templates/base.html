@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+</head>
+<body>
+
+<header class="header">
+
+    <div class="header-1">
+
+        <a href="{% url 'homePage' %}" class="logo"> <i class="fas fa-book"></i> Di Immortales </a>
+        <form action="{% url 'search' %}" class="search-form" method="get">
+            <input type="search" name="q" placeholder="Нажмите для поиска..." id="search-box">
+            <label for="search-box" class="fas fa-search" type="submit"></label>
+        </form>
+
+        <div class="icons">
+            <div id="search-btn" class="fas fa-search"></div>
+            <a href="{% url 'favorite' %}" class="fas fa-heart"></a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'view_cart' %}" class="fas fa-shopping-cart"></a>
+            {% else %}
+                <a href="/login" class="fas fa-shopping-cart"></a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}"><div id="logout-btn" class="fas fa-user"></div></a>
+            {% else %}
+                <a href="/login"><div id="login-btn" class="fas fa-user"></div></a>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="header-2">
+        <nav class="navbar">
+            <a href="{% url 'homePage' %}">Главная</a>
+            <a href="{% url 'index' %}#featured">Рекомендации</a>
+            <a href="{% url 'index' %}#arrivals">Новинки</a>
+            <a href="{% url 'reviewsPage' %}">Отзывы</a>
+            <a href="{% url 'newsPage' %}">Новости</a>
+            <a href="{% url 'catalogPage' %}">Каталог</a>
+        </nav>
+    </div>
+
+</header>
+
+<nav class="bottom-navbar">
+    <a href="{% url 'homePage' %}" class="fas fa-home"></a>
+    <a href="{% url 'index' %}#featured" class="fas fa-list"></a>
+    <a href="{% url 'index' %}#arrivals" class="fas fa-tags"></a>
+    <a href="{% url 'reviewsPage' %}" class="fas fa-comments"></a>
+    <a href="{% url 'newsPage' %}" class="fas fa-blog"></a>
+    <a href="{% url 'catalogPage' %}" class="fas fa-book-open"></a>
+</nav>
+
+
+  {% block content %}
+  {% endblock %}
+
+<section class="footer">
+
+    <div class="box-container">
+
+        <div class="box">
+            <h3>Быстрые ссылки</h3>
+            <a href="{% url 'homePage' %}"> <i class="fas fa-arrow-right"></i> Главная </a>
+            <a href="{% url 'index' %}#featured"> <i class="fas fa-arrow-right"></i> Рекомендации </a>
+            <a href="{% url 'index' %}#arrivals"> <i class="fas fa-arrow-right"></i> Новинки </a>
+            <a href="{% url 'reviewsPage' %}"> <i class="fas fa-arrow-right"></i> Отзывы </a>
+            <a href="{% url 'newsPage' %}"> <i class="fas fa-arrow-right"></i> Новости </a>
+        </div>
+
+        <div class="box">
+            <h3>Важные ссылки</h3>
+            <a href="#"> <i class="fas fa-arrow-right"></i> О нас </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> Политика конфиденциальности </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> Методы оплаты </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> Доставка </a>
+            <a href="#"> <i class="fas fa-arrow-right"></i> Наши сервисы </a>
+        </div>
+
+        <div class="box">
+            <h3>Связь с нами</h3>
+            <a href="#"> <i class="fas fa-phone"></i> 8 (800) 555 35 35 </a>
+            <a href="#"> <i class="fas fa-phone"></i> +666 </a>
+            <a href="#"> <i class="fas fa-envelope"></i> diimmortales@gmail.com </a>
+        </div>
+
+    </div>
+
+    <div class="share">
+        <a href="https://www.facebook.com/" class="fab fa-facebook-f"></a>
+        <a href="https://twitter.com/?lang=ru" class="fab fa-twitter"></a>
+        <a href="https://www.instagram.com/" class="fab fa-instagram"></a>
+        <a href="https://t.me/@htonj_bot" class="fab fa-telegram"></a>
+        <a href="https://ru.pinterest.com/" class="fab fa-pinterest"></a>
+    </div>
+
+</section>
+
+<script src="{% static './js/script.js' %}"></script>
+
+
+</body>
+</html>

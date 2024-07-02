@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block title %}Отзывы{% endblock %}
+
+{% block content %}
+
+<style>
+    .reviews .box{
+    border:var(--border);
+    padding:2rem;
+    text-align: center;
+    margin:2rem 0;
+    width:90%;
+}
+
+.reviews .box:hover{
+    border:var(--border-hover);
+}
+
+.reviews .box img{
+    height:7rem;
+    width:7rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.reviews  .box h3{
+    color:var(--black);
+    font-size: 2.2rem;
+    padding:.5rem 0;
+}
+
+.reviews  .box p{
+    color:var(--light-color);
+    font-size: 1.4rem;
+    padding:1rem 0;
+    line-height: 2;
+}
+</style>
+
+<section>
+    <h1 class="heading"> <span>Отзывы</span> </h1>
+    <div class="reviews">
+        {% for review in reviews %}
+        <div class="box">
+            <img src="{{ review.user.profile.avatar.url }}" alt="Аватар">
+            <h3>{{ review.user.username }}</h3>
+            <p>{{ review.review_content }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

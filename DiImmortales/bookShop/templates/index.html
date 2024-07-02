@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+
+<section class="home" id="home" style="background-image:url({% static './img/banner-bg.jpg' %}">
+
+    <div class="row">
+
+        <div class="content">
+            <h3>Скидки 75%</h3>
+            <p>Покупайте 1 + 1 и получите скидку 75% на 3 книгу!</p>
+            <a href="{% url 'catalogPage' %}" class="btn">Купить</a>
+        </div>
+
+        <div class="swiper books-slider">
+            <div class="swiper-wrapper">
+                <a href="#" class="swiper-slide"><img src="{% static './img/book-1.jpeg' %}" alt=""></a>
+                <a href="#" class="swiper-slide"><img src="{% static './img/book-2.jpg' %}" alt=""></a>
+                <a href="#" class="swiper-slide"><img src="{% static './img/book-3.jpg' %}" alt=""></a>
+            </div>
+            <img src="{% static './img/stand.png' %}" class="stand" alt="">
+        </div>
+
+    </div>
+</section>
+
+<section class="featured" id="featured">
+
+    <a href="{% url 'catalogPage' %}"><h1 class="heading"> <span>Рекомендации</span> </h1> </a>
+
+    <div class="swiper featured-slider">
+
+        <div class="swiper-wrapper">
+
+            {% for book in books %}
+            <div class="swiper-slide box">
+                <div class="icons">
+                    <a href="#" class="fas fa-search"></a>
+                    <a href="#" class="fas fa-heart" id="favorite-icon-{{ book.id }}" onclick="addToFavorites({{ book.id }})"></a>
+                    <a href="{% url 'bookDetail' pk=book.pk %}" class="fas fa-eye"></a>
+                </div>
+                <div class="image">
+                    <img src="{{ book.bookImage }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>Рекомендация</h3>
+                    <div class="price">{{ book.price }} ₸</div>
+                     {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'add_to_cart' book.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Добавить в корзину</button>
+                        </form>
+                    {% else %}
+                         <a href="/login" class="btn">Добавить в корзину</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% endfor %}
+
+
+        </div>
+
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+
+    </div>
+
+
+</section>
+
+<section class="arrivals" id="arrivals">
+
+    <a href="{% url 'catalogPage' %}" > <h1 class="heading"> <span>Новинки</span> </h1> </a>
+
+    <div class="swiper arrivals-slider">
+
+
+        <div class="swiper-wrapper">
+
+            {% for book in books %}
+
+            <a href="{% url 'bookDetail' pk=book.pk %}" class="swiper-slide box">
+                <div class="image">
+                    <img src="{{ book.bookImage }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>Новинка</h3>
+                    <div class="price">{{ book.price }} ₸</div>
+                </div>
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+<section class="deal">
+
+    <div class="content">
+        <h3>Cделка дня</h3>
+        <h1>Cкидки до 50%</h1>
+        <p>Успей приобрести любимые книги по скидке!</p>
+        <a href="{% url 'catalogPage' %}" class="btn">Купить</a>
+    </div>
+
+    <div class="image">
+        <img src="{% static './img/books-deal.png' %}" alt="">
+    </div>
+
+</section>
+
+<section class="reviews" id="reviews">
+
+    <a href="{% url 'reviewsPage' %}"> <h1 class="heading"> <span>Отзывы</span> </h1> </a>
+
+    <div class="swiper reviews-slider">
+
+        <div class="swiper-wrapper">
+
+            {% for review in reviews %}
+
+            <div class="swiper-slide box">
+                <img src="{{ review.user.profile.avatar.url }}" alt="">
+                <h3>{{ review.user.username }}</h3>
+                <p>{{ review.review_content }}.</p>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="blogs" id="blogs">
+
+    <a href="{% url 'newsPage' %}" > <h1 class="heading"> <span>Новости</span> </h1> </a>
+
+    <div class="swiper blogs-slider">
+
+        <div class="swiper-wrapper">
+
+            {% for new in news %}
+
+            <div class="swiper-slide box">
+                <div class="image">
+                    <img src="{{ new.newsImage }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>{{ new.title }}</h3>
+                    <p>{{ new.content|truncatewords:20 }}</p>
+                    <a href="{% url 'newsDetail' pk=new.pk %}" class="btn">Читать</a>
+                </div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateFavorites(); // Вызываем функцию обновления цвета сердца при загрузке страницы
+});
+
+function updateFavorites() {
+    fetch('{% url 'get_favorites' %}')
+    .then(response => response.json())
+    .then(data => {
+        // Получаем список избранных книг
+        const favoriteBooks = data.favorite_books;
+
+        // Обновляем цвет сердца для каждой книги
+        favoriteBooks.forEach(bookId => {
+            const favoriteIcon = document.getElementById('favorite-icon-' + bookId);
+            if (favoriteIcon) {
+                favoriteIcon.style.color = 'red'; // Устанавливаем красный цвет для сердца
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Ошибка при получении списка избранных книг:', error);
+    });
+}
+
+function addToFavorites(bookId) {
+    fetch(`/add_to_favorites/${bookId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            'book_id': bookId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload(); // Перезагружаем страницу после успешного добавления/удаления товара
+        } else {
+            alert('Что-то пошло не так.');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при выполнении запроса:', error);
+        alert('Что-то пошло не так.');
+    });
+}
+</script>
+
+{% endblock %}
+

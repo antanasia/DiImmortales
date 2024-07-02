@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block title %}Изменение аватара{% endblock %}
+
+{% block content %}
+
+<div class="logup-form-container">
+
+    <a href="{% url 'profile' %}"><div id="close-logup-btn" class="fas fa-times"></div></a>
+
+    <img src="{{ user.profile.avatar.url }}" width="150">
+    <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ avatar_form.as_p }}
+    <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        {% for error in form.errors %}
+            <span>{{ error }}</span>
+        {% endfor %}
+</form>
+
+</div>
+
+<style>
+
+    .logup-form-container{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,.9);
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 10000;
+        height: 100%;
+        width: 100%;
+    }
+
+    .logup-form-container.active{
+        right: -105%;
+    }
+
+    .logup-form-container form{
+        background: #fff;
+        border: var(--border);
+        width: 40rem;
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+        border-radius: .5rem;
+        margin: 2rem;
+    }
+
+    .logup-form-container form h3{
+        font-size: 2.5rem;
+        text-transform: uppercase;
+        color: var(--black);
+        text-align: center;
+    }
+
+    .logup-form-container form span{
+        display: block;
+        font-size: 1.5rem;
+        padding-top: 1rem;
+    }
+
+    .logup-form-container form .box{
+        width: 100%;
+        margin: .7rem 0;
+        font-size: 1.6rem;
+        border: var(--border);
+        border-radius: .5rem;
+        padding: 1rem 1.2rem;
+        color: var(--black);
+        text-transform: none;
+    }
+
+    .logup-form-container form .btn{
+        text-align: center;
+        width: 100%;
+        margin: 1.5rem 0;
+    }
+
+    .logup-form-container form p{
+        padding-top: .8rem;
+        color: var(--light-color);
+        font-size: 1.5rem;
+    }
+
+    .logup-form-container form p a{
+        color: var(--green);
+        text-decoration: underline;
+    }
+
+    .logup-form-container #close-logup-btn{
+        position: absolute;
+        top: 1.5rem;
+        right: 2.5rem;
+        font-size: 5rem;
+        color: var(--black);
+        cursor: pointer;
+    }
+</style>
+
+
+{% endblock %}>

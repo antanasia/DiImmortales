@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Избранное{% endblock %}
+
+{% block content %}
+
+    <style>
+
+    .book .box{
+        margin:2rem;
+        position: relative;
+        overflow: hidden;
+        border:var(--border);
+        text-align: center;
+        width:30%;
+        display:inline-block;
+    }
+
+    .book .box:hover{
+        border:var(--border-hover);
+    }
+
+    .book .box .image{
+        padding:1rem;
+        background: linear-gradient(15deg, #eee 30%, #fff 30.1%);
+    }
+
+    .book  .box:hover .image{
+        transform: translateY(6rem);
+    }
+
+    .book .box .image img{
+        height: 25rem;
+    }
+
+    .book  .box .icons{
+        border-bottom: var(--border-hover);
+        position: absolute;
+        top:0; left:0; right: 0;
+        background: #fff;
+        z-index: 1;
+        transform: translateY(-105%);
+    }
+
+    .book .box:hover .icons{
+        transform: translateY(0%);
+    }
+
+    .book .box .icons a{
+        color:var(--black);
+        font-size: 2.2rem;
+        padding:1.3rem 1.5rem;
+    }
+
+    .book  .box .icons a:hover{
+        background:var(--basic);
+        color:#fff;
+    }
+
+    .book  .box .content{
+        background:#eee;
+        padding:1.5rem;
+    }
+
+    .book  .box .content h3{
+        font-size: 2rem;
+        color:var(--black);
+    }
+
+    .book .box .content .price{
+        font-size: 2.2rem;
+        color:var(--black);
+        padding-top: 1rem;
+    }
+    .book .box .icons a.fa-heart{
+        color: red;
+    }
+
+    .empty-cart-message {
+    text-align: center;
+    margin:320px;
+}
+
+.empty-cart-message p {
+    font-size: 50px;
+    font-weight: bold;
+    color: #666;
+}
+
+.empty-cart-message a {
+    margin-top:50px;
+}
+    </style>
+
+{% if favorite_items %}
+    <div class="book">
+        {% for item in favorite_items %}
+            <div class="box">
+                <div class="icons">
+                    <a href="#" class="fas fa-search"></a>
+                    <a href="#" class="fas fa-heart{% if item.book.id in favorite_books %}-active{% endif %}" id="favorite-icon-{{ item.book.id }}" onclick="toggleFavorite({{ item.book.id }})"></a>
+                    <a href="{% url 'bookDetail' pk=item.book.pk %}" class="fas fa-eye"></a>
+                </div>
+                <div class="image">
+                    <img src="{{ item.book.bookImage }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>{{ item.book.bookName }}</h3>
+                    <div class="price">{{ item.book.price }} $</div>
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'add_to_cart' item.book.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Добавить в корзину</button>
+                        </form>
+                    {% else %}
+                        <a href="/login" class="btn">Добавить в корзину</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-cart-message">
+        <p>Нет избранных товаров</p>
+        <a href="{% url 'catalogPage' %}" class="btn">Перейти в каталог</a>
+    </div>
+{% endif %}
+
+<script>
+
+    function toggleFavorite(bookId) {
+    const favoriteIcon = document.getElementById('favorite-icon-' + bookId);
+    const isFavorite = favoriteIcon.classList.contains('fa-heart-active');
+
+    fetch(`/add_to_favorites/${bookId}/`, {
+        method: isFavorite ? 'DELETE' : 'POST',  // Метод DELETE для удаления, POST для добавления
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            'book_id': bookId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            if (!isFavorite) {
+                favoriteIcon.classList.add('fa-heart-active'); // Добавляем класс активности, если товар добавлен в избранное
+            }
+            location.reload(); // Перезагружаем страницу после успешного добавления/удаления товара
+        } else {
+            alert('Что-то пошло не так.');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при выполнении запроса:', error);
+        alert('Что-то пошло не так.');
+    });
+}
+
+
+</script>
+
+{% endblock %}

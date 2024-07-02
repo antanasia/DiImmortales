@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+
+<h1>Оплата через Stripe</h1>
+    <form action="{% url 'create_payment_intent' %}" method="POST" id="payment-form">
+        {% csrf_token %}
+        <button type="submit">Оплатить</button>
+    </form>
+
+<script>
+        // JavaScript код для отправки запроса на создание платежа Stripe
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('{% url "create_payment_intent" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Обработка данных, если это необходимо
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Обработка ошибок при отправке запроса
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block title %}Новости{% endblock %}
+
+{% block content %}
+
+<style>
+
+   .blogs .box{
+    margin:2rem 0;
+    border:var(--border);
+    paddings:1.8rem;
+}
+
+.blogs .box:hover{
+    border:var(--border-hover);
+}
+
+.blogs .box .image{
+    height: 25rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+.blogs .box .image img{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.blogs .box:hover .image img{
+    transform: scale(1.1);
+}
+
+.blogs .box .content{
+    padding:1.5rem;
+}
+
+.blogs .box .content h3{
+    font-size: 2.2rem;
+    color:var(--black);
+}
+
+.blogs.box .content p{
+    font-size: 1.4rem;
+    color:var(--light-color);
+    padding:1rem 0;
+    line-height: 2;
+}
+
+</style>
+
+<section>
+
+    <h1 class="heading"><span>Новости</span></h1>
+
+    <div class="blogs">
+
+        {% for new in news %}
+
+        <div class="box">
+            <div class="image">
+                <img src="{{ new.newsImage }}" alt="">
+            </div>
+            <div class="content">
+                <h3>{{ new.title }}</h3>
+                <p>{{ new.content|truncatewords:20 }}</p>
+                <a href="{% url 'newsDetail' pk=new.pk %}" class="btn">Читать</a>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

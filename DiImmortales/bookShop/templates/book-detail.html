@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Детали книги{% endblock %}
+
+
+{% block content %}
+
+<style>
+    * {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-transform: none;
+        outline: none;
+        border: none;
+        text-decoration: none;
+        transition: all .2s linear;
+    }
+
+    .container {
+        max-width: 90%;
+        margin: auto;
+        margin-top: 5%;
+        box-shadow: 0.3rem 0.3rem 0.6rem 0.2rem rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .left,
+    .right {
+        width: 50%;
+        box-sizing: border-box;
+        padding: 2rem;
+    }
+
+    .image img {
+        width: 100%;
+        height: auto;
+        max-width: 40rem;
+        /* Заменил значение на 40rem */
+        padding: 1.8rem;
+        /* Уменьшил отступы */
+    }
+
+
+    .right {
+        padding: 2rem 3rem;
+    }
+
+    .right h3 {
+        font-size: 5rem;
+    }
+
+    .right h4 {
+        font-size: 3.5rem;
+    }
+
+    .right h5 {
+        font-size: 2rem;
+        padding: 1rem 0;
+    }
+
+    .right p {
+        font-size: 1.6rem;
+        padding: 1rem 0 3rem 0;
+    }
+
+    .btn {
+        margin-top: 3.5rem;
+        padding: .9rem 3rem;
+        border-radius: .5rem;
+        color: #fff;
+        background: var(--basic);
+        font-size: 1.7rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+</style>
+
+<section>
+    <div class="container flex">
+
+        <div class="left">
+
+            <div class="image">
+                <img src="{{ book.bookImage }}" alt="">
+            </div>
+
+        </div>
+
+        <div class="right">
+
+            <h3> {{ book.bookName }} </h3>
+            <h4> {{ book.bookAuthor }} </h4>
+            <h5> {{ book.pages }}стр. </h5>
+            <h5> {{ book.price }}$ </h5>
+            <p>{{ book.description }} </p>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add_to_cart' book.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">Добавить в корзину</button>
+            </form>
+            {% else %}
+            <a href="/login" class="btn">Добавить в корзину</a>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+
+{% endblock %}
